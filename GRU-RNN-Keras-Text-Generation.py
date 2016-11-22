@@ -112,11 +112,6 @@ if Answer == 0:
 
     RMSprop_optimizer = RMSprop(lr=learning_rate)
     model.compile(loss='categorical_crossentropy', optimizer=RMSprop_optimizer)
-
-    # define the checkpoint
-    filepath="GRUWeights.hdf5"
-    checkpoint = ModelCheckpoint(filepath, monitor='loss', verbose=1, save_best_only=True, mode='min')
-    callbacks_list = [checkpoint]
     
     # save the model information
     model.save('GRUModel.h5')
@@ -139,7 +134,13 @@ else:
         f = open('GRUTimeStep','w+')
         f.write(str(seq_len))
         f.close()
-    
+
+        
+# define the checkpoint
+    filepath="GRUWeights.h5"
+    checkpoint = ModelCheckpoint(filepath, monitor='loss', verbose=1, save_best_only=True, mode='min')
+    callbacks_list = [checkpoint]
+
 # Function for creating a sample text from a random seed (an extract from the dataset).
 # The seed acts as the input for the GRU RNN and after feed forwarding through the network it produces the output
 # (the output can be considered to be the prediction for the next character)
@@ -178,7 +179,7 @@ def sample(seed):
 if Answer == 0 or Answer == 2:
     if Answer == 2:
         # load the network weights
-        filename = "GRUWeights.hdf5"
+        filename = "GRUWeights.h5"
         try:
             model.load_weights(filename)
         except:
@@ -202,7 +203,7 @@ if Answer == 0 or Answer == 2:
         sample(seed)
 else:
     # load the network weights
-    filename = "GRUWeights.hdf5"
+    filename = "GRUWeights.h5"
     try:
         model.load_weights(filename)
     except:
