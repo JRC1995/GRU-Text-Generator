@@ -18,7 +18,7 @@ import sys
 # load Dataset
 """path = "Witt2.txt" # Extract from Wittgenstein's 'Philosophical Investigations'"""
 
-path = raw_input("Enter file name for training and testing data(make sure it's in the same directory): ")
+path = raw_input("Enter file name (example: Wittgenstein.txt) for training and testing data (make sure it's in the same directory): ")
 dataset = open(path).read().lower()
 
 # store the list of all unique characters in dataset
@@ -47,6 +47,7 @@ sample_len = int(raw_input("\nLength of sample text: "))
 print("\nChoose:")
 print("Enter 0 if you want train the model.")
 print("Enter 1 if you want to load saved model and weights.")
+print("Enter 2 to resume training using last saved model and weights.")
 Answer = int(raw_input('Enter: '))
 
 if Answer == 0:
@@ -79,7 +80,7 @@ if Answer == 0:
         dataY.append(dataset[i+seq_len])    # Example of corresponding Target Output Data: e
 
     total_patterns = len(dataX) 
-    print("Total Patterns: ", total_patterns)
+    print("\nTotal Patterns: ", total_patterns)
 
     # One Hot Encoding...
     X = np.zeros((total_patterns, seq_len, vocabulary), dtype=np.bool)
@@ -166,16 +167,24 @@ def sample(seed):
             next_char = int_to_char[RNG_int]
           
             # Display the chosen character
-            sys.stdout.write(next_char)
-            sys.stdout.flush()            
-            
+            print(next_char, end="")
+            #sys.stdout.flush() # flush is making text portions vanish for some reason
             # modifying seed for the next iteration for finding the next character
             seed = seed[1:] + next_char
             
     print()
             
 
-if Answer == 0:
+if Answer == 0 or Answer == 2:
+    if Answer == 2:
+        # load the network weights
+        filename = "GRUWeights.hdf5"
+        try:
+            model.load_weights(filename)
+        except:
+            print("\nUh Oh! Caught some exceptions! May be you don't have any trained and saved weights to load.")
+            print("Solution: May be create and train the model anew ?")
+            sys.exit(0)
     # Train Model and print sample text at each epoch.
     for iteration in range(1, 60):
         print()
