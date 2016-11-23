@@ -176,7 +176,7 @@ def sample(seed):
             next_char = int_to_char[RNG_int] 
             
             # Display the chosen character
-            print(enter_break, end="")
+            print(next_char, end="")
             sys.stdout.flush()
             # modifying seed for the next iteration for finding the next character
             seed = seed[1:] + next_char
