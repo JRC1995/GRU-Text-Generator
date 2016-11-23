@@ -14,11 +14,12 @@ from keras.models import load_model
 import numpy as np
 import random
 import sys
+import os
 
 # load Dataset
 """path = "Witt2.txt" # Extract from Wittgenstein's 'Philosophical Investigations'"""
 
-path = raw_input("Enter file name (example: Wittgenstein.txt) for training and testing data (make sure it's in the same directory): ")
+path = raw_input("Enter file name (example: Wittgenstein.txt) for training and testing data (make sure it's in the same directory):\n ")
 dataset = open(path).read().lower()
 
 # store the list of all unique characters in dataset
@@ -70,8 +71,17 @@ if Answer == 0:
     dropout_rate = float(raw_input("Dropout Rate: "))
     batch = int(raw_input("Training Batch Size: "))
 
+    # Doing some maths so that the total patterns in future become DIVISIBLE by batch size
+    # total no. of patterns need to divisible by batch size because each batch must be of the same size..
+    # ...so that the RNN layer can be 'Stateful'
+    
+    index = int((total_chars-seq_len)/batch)
+    index = batch*index
+    dataset = dataset[:index+seq_len]
+    total_chars=len(dataset)
+    
     # prepare input data and output(target) data
-    # (X signified Inputs and Y signifies Output(targeted-output in this case))
+    # (X signified Inputs and Y signifies Output(targeted-output in this case)
     dataX = []   
     dataY = []
 
@@ -98,14 +108,14 @@ print('\nBuilding model...')
 
 if Answer == 0:
     model = Sequential()
-
     if hidden_layers == 1:
-        model.add(GRU(neurons[0], input_shape=(seq_len,vocabulary)))
+        model.add(GRU(neurons[0], batch_input_shape=(batch, seq_len, vocabulary), stateful=True))
     else:
-        model.add(GRU(neurons[0], input_shape=(seq_len,vocabulary),return_sequences=True))
-
+        model.add(GRU(neurons[0], batch_input_shape=(batch, seq_len, vocabulary), stateful=True, return_sequences=True))
+    model.add(Dropout(dropout_rate))
     for i in xrange(1,hidden_layers):
-        model.add(GRU(neurons[i]))
+        model.add(GRU(neurons[i], stateful=True))
+        model.add(Dropout(dropout_rate))
     
     model.add(Dense(vocabulary))
     model.add(Activation('softmax'))
@@ -113,7 +123,7 @@ if Answer == 0:
     RMSprop_optimizer = RMSprop(lr=learning_rate)
     model.compile(loss='categorical_crossentropy', optimizer=RMSprop_optimizer)
     
-    # save the model information
+    # save model information
     model.save('GRUModel.h5')
     f = open('GRUTimeStep','w+')
     f.write(str(seq_len))
@@ -136,26 +146,24 @@ else:
         f.close()
 
         
-# define the checkpoint
-    filepath="GRUWeights.h5"
-    checkpoint = ModelCheckpoint(filepath, monitor='loss', verbose=1, save_best_only=True, mode='min')
-    callbacks_list = [checkpoint]
+# define the checkpoint 
+filepath="GRUWeights.h5" # Best weights for sampling will be saved here.
+checkpoint = ModelCheckpoint(filepath, monitor='loss', verbose=1, save_best_only=True, save_weights_only=True, mode='min')
 
 # Function for creating a sample text from a random seed (an extract from the dataset).
 # The seed acts as the input for the GRU RNN and after feed forwarding through the network it produces the output
 # (the output can be considered to be the prediction for the next character)
 
 def sample(seed):
-    
-    # One hot encoding the input seed
     for i in xrange(sample_len):
-            x = np.zeros((1, seq_len, vocabulary))
+             # One hot encoding the input seed
+            x = np.zeros((batch, seq_len, vocabulary))
             for seq_pos in xrange(seq_len):
                 vocab_index = char_to_int[seed[seq_pos]]
                 x[0,seq_pos,vocab_index] = 1
-            
             # procuring the output (or prediction) from the network
-            prediction = model.predict(x, verbose=0)
+            prediction = model.predict(x,batch_size=batch,verbose=0)
+            prediction = prediction[0]
             
             # The prediction is an array of probabilities for each unique characters. 
             # Randomly an integer(mapped to a character) is chosen based on its likelihood 
@@ -177,23 +185,16 @@ def sample(seed):
             
 
 if Answer == 0 or Answer == 2:
-    if Answer == 2:
-        # load the network weights
-        filename = "GRUWeights.h5"
-        try:
-            model.load_weights(filename)
-        except:
-            print("\nUh Oh! Caught some exceptions! May be you don't have any trained and saved weights to load.")
-            print("Solution: May be create and train the model anew ?")
-            sys.exit(0)
     # Train Model and print sample text at each epoch.
-    for iteration in range(1, 60):
+    for iteration in range(1,2):
         print()
         print('Iteration: ', iteration)
         print()
         
         # Train model. If you have forgotten: X = input, Y = targeted outputs
-        model.fit(X, Y, batch_size=batch, nb_epoch=1, callbacks=callbacks_list)
+        model.fit(X, Y, batch_size=batch, nb_epoch=1, callbacks=[checkpoint])
+        model.save('GRUModel.h5') # Saving current model state so that even after terminating the program; training
+                                  # can be resumed for last state in the next run.
         print()
         
         # Randomly choosing a sequence from dataset to serve as a seed for sampling
