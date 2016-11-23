@@ -17,8 +17,6 @@ import sys
 import os
 
 # load Dataset
-"""path = "Witt2.txt" # Extract from Wittgenstein's 'Philosophical Investigations'"""
-
 path = raw_input("Enter file name (example: Wittgenstein.txt) for training and testing data (make sure it's in the same directory):\n ")
 dataset = open(path).read().lower()
 
