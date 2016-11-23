@@ -17,6 +17,8 @@ import sys
 import os
 
 # load Dataset
+"""path = "Witt2.txt" # Extract from Wittgenstein's 'Philosophical Investigations'"""
+
 path = raw_input("Enter file name (example: Wittgenstein.txt) for training and testing data (make sure it's in the same directory):\n ")
 dataset = open(path).read().lower()
 
@@ -101,10 +103,9 @@ if Answer == 0:
         vocab_index = char_to_int[dataY[pattern]]
         Y[pattern,vocab_index] = 1
     
-# build the model: a multi(or single depending on user input)-layered GRU based RNN
-print('\nBuilding model...')
+    # build the model: a multi(or single depending on user input)-layered GRU based RNN
+    print('\nBuilding model...')
 
-if Answer == 0:
     model = Sequential()
     if hidden_layers == 1:
         model.add(GRU(neurons[0], batch_input_shape=(batch, seq_len, vocabulary), stateful=True))
@@ -128,6 +129,7 @@ if Answer == 0:
     f.close()
     
 else:
+    print('\nLoading model...')
     try:
         model = load_model('GRUModel.h5')
     except:
@@ -171,11 +173,11 @@ def sample(seed):
             
             # The next character (to generate) is mapped to the randomly chosen integer 
             # Procuring the next character from the dictionary by putting in the chosen integer
-            next_char = int_to_char[RNG_int]
-          
+            next_char = int_to_char[RNG_int] 
+            
             # Display the chosen character
-            print(next_char, end="")
-            #sys.stdout.flush() # flush is making text portions vanish for some reason
+            print(enter_break, end="")
+            sys.stdout.flush()
             # modifying seed for the next iteration for finding the next character
             seed = seed[1:] + next_char
             
