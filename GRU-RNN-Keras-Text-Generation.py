@@ -158,12 +158,18 @@ def sample(seed):
     for i in xrange(sample_len):
              # One hot encoding the input seed
             x = np.zeros((batch, seq_len, vocabulary))
+             # There was only one pattern (seed) to enter but for stateful to work batch size should be fixed 
+             # and a no. of patterns entered in the model must be same as batch size.
+             # So I shaped x input as to have batch size of patterns. But only one pattern in x[0,_,_] will be hot encoded
+             # and others will be all 0s because we have only one pattern lenth of infromation from seed.
             for seq_pos in xrange(seq_len):
                 vocab_index = char_to_int[seed[seq_pos]]
                 x[0,seq_pos,vocab_index] = 1
             # procuring the output (or prediction) from the network
             prediction = model.predict(x,batch_size=batch,verbose=0)
-            prediction = prediction[0]
+            # Since only the first pattern in the input x had value, only the prediction (prediction[0,_]) 
+            # for the first pattern in x (x[0,_,_]) is relevant
+            prediction = prediction[0] 
             
             # The prediction is an array of probabilities for each unique characters. 
             # Randomly an integer(mapped to a character) is chosen based on its likelihood 
@@ -186,7 +192,7 @@ def sample(seed):
 
 if Answer == 0 or Answer == 2:
     # Train Model and print sample text at each epoch.
-    for iteration in range(1,2):
+    for iteration in range(1,60):
         print()
         print('Iteration: ', iteration)
         print()
