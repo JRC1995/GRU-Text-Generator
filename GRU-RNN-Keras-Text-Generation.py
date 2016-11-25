@@ -53,11 +53,11 @@ if Answer == 0:
     
     # Tested with:
     # Number of Hidden Layers: 1
-    # Number of Neurons in Hidden Layer 1: 100
-    # Time Steps: 30
+    # Number of Neurons in Hidden Layer 1: 128
+    # Time Steps: 100
     # Learning Rate: 0.01
     # Dropout Rate: 0.2
-    # Batch Size: 125 or something
+    # Batch Size: 128
     # Do try other combinations
     
     hidden_layers = int(raw_input("\nNumber of Hidden Layers: "))
