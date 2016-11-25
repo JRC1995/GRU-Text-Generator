@@ -50,16 +50,6 @@ print("Enter 2 to resume training using last saved model and weights.")
 Answer = int(raw_input('Enter: '))
 
 if Answer == 0:
-    
-    # Tested with:
-    # Number of Hidden Layers: 1
-    # Number of Neurons in Hidden Layer 1: 128
-    # Time Steps: 100
-    # Learning Rate: 0.01
-    # Dropout Rate: 0.2
-    # Batch Size: 128
-    # Do try other combinations
-    
     hidden_layers = int(raw_input("\nNumber of Hidden Layers: "))
     neurons = []
     for i in xrange(0,hidden_layers):
@@ -131,7 +121,10 @@ if Answer == 0:
         model.add(GRU(neurons[0], batch_input_shape=(batch, seq_len, vocabulary), stateful=True, return_sequences=True))
     model.add(Dropout(dropout_rate))
     for i in xrange(1,hidden_layers):
-        model.add(GRU(neurons[i], stateful=True))
+          if i == (hidden_layers-1):
+            model.add(GRU(neurons[i], stateful=True))
+        else:
+            model.add(GRU(neurons[i], stateful=True, return_sequences=True))
         model.add(Dropout(dropout_rate))
     
     model.add(Dense(vocabulary))
