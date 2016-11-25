@@ -44,8 +44,8 @@ if mapvar == "y" or mapvar == "Y":
 # Asking the important questions
 sample_len = int(raw_input("\nLength of sample text: "))
 print("\nChoose:")
-print("Enter 0 if you want train the model.")
-print("Enter 1 if you want to load saved model and weights.")
+print("Enter 0 to create a model and train it from the beginning.")
+print("Enter 1 to generate texts from saved model and weights.")
 print("Enter 2 to resume training using last saved model and weights.")
 Answer = int(raw_input('Enter: '))
 
@@ -69,6 +69,25 @@ if Answer == 0:
     dropout_rate = float(raw_input("Dropout Rate: "))
     batch = int(raw_input("Training Batch Size: "))
 
+if Answer != 0:
+    try:
+        f = open('GRUModelInfo',"r")
+        lines = f.readlines()
+        for i in lines:
+            thisline = i.split(" ")
+        seq_len = int(thisline[0])
+        batch = int(thisline[1])
+        f.close()
+    except:
+        print("\nUh Oh! Caught some exceptions! May be you are missing the file having time step information")
+        seq_len = int(raw_input("Time Steps (I hope, you remember what it was): "))
+        batch = int(raw_input("Training batch size(I hope, you remember what it was): "))
+        f = open('GRUModelInfo','w+')
+        f.write(str(seq_len)+" "+str(batch))
+        f.close()    
+
+if Answer == 0 or Answer == 2:
+    
     # Doing some maths so that the total patterns in future become DIVISIBLE by batch size
     # total no. of patterns need to divisible by batch size because each batch must be of the same size..
     # ...so that the RNN layer can be 'Stateful'
@@ -100,7 +119,8 @@ if Answer == 0:
             X[pattern,seq_pos,vocab_index] = 1
         vocab_index = char_to_int[dataY[pattern]]
         Y[pattern,vocab_index] = 1
-    
+
+if Answer == 0:        
     # build the model: a multi(or single depending on user input)-layered GRU based RNN
     print('\nBuilding model...')
 
@@ -122,10 +142,10 @@ if Answer == 0:
     
     # save model information
     model.save('GRUModel.h5')
-    f = open('GRUTimeStep','w+')
-    f.write(str(seq_len))
+    f = open('GRUModelInfo','w+')
+    f.write(str(seq_len)+" "+str(batch))
     f.close()
-    
+
 else:
     print('\nLoading model...')
     try:
@@ -134,18 +154,12 @@ else:
         print("\nUh Oh! Caught some exceptions! May be you don't have any trained and saved model to load.")
         print("Solution: May be create and train the model anew ?")
         sys.exit(0)
-    try:
-        seq_len = int(open('GRUTimeStep').read())
-    except:
-        print("\nUh Oh! Caught some exceptions! May be you are missing the file having time step information")
-        seq_len = int(raw_input("Time Steps (I hope, you remember what it was): "))
-        f = open('GRUTimeStep','w+')
-        f.write(str(seq_len))
-        f.close()
-
+ 
+    
+model.summary()
         
 # define the checkpoint 
-filepath="GRUWeights.h5" # Best weights for sampling will be saved here.
+filepath="BestGRUWeights.h5" # Best weights for sampling will be saved here.
 checkpoint = ModelCheckpoint(filepath, monitor='loss', verbose=1, save_best_only=True, save_weights_only=True, mode='min')
 
 # Function for creating a sample text from a random seed (an extract from the dataset).
@@ -156,18 +170,12 @@ def sample(seed):
     for i in xrange(sample_len):
              # One hot encoding the input seed
             x = np.zeros((batch, seq_len, vocabulary))
-             # There was only one pattern (seed) to enter but for stateful to work batch size should be fixed 
-             # and a no. of patterns entered in the model must be same as batch size.
-             # So I shaped x input as to have batch size of patterns. But only one pattern in x[0,_,_] will be hot encoded
-             # and others will be all 0s because we have only one pattern lenth of infromation from seed.
             for seq_pos in xrange(seq_len):
                 vocab_index = char_to_int[seed[seq_pos]]
                 x[0,seq_pos,vocab_index] = 1
             # procuring the output (or prediction) from the network
             prediction = model.predict(x,batch_size=batch,verbose=0)
-            # Since only the first pattern in the input x had value, only the prediction (prediction[0,_]) 
-            # for the first pattern in x (x[0,_,_]) is relevant
-            prediction = prediction[0] 
+            prediction = prediction[0]
             
             # The prediction is an array of probabilities for each unique characters. 
             # Randomly an integer(mapped to a character) is chosen based on its likelihood 
@@ -180,7 +188,7 @@ def sample(seed):
             next_char = int_to_char[RNG_int] 
             
             # Display the chosen character
-            print(next_char, end="")
+            sys.stdout.write(next_char)
             sys.stdout.flush()
             # modifying seed for the next iteration for finding the next character
             seed = seed[1:] + next_char
@@ -189,6 +197,14 @@ def sample(seed):
             
 
 if Answer == 0 or Answer == 2:
+    if Answer == 2:
+        filename = "GRUWeights.h5"
+        try:
+            model.load_weights(filename)
+        except:
+                print("\nUh Oh! Caught some exceptions! May be you don't have any trained and saved weights to load.")
+                print("Solution: May be create and train the model anew ?")
+                sys.exit(0)
     # Train Model and print sample text at each epoch.
     for iteration in range(1,60):
         print()
@@ -197,7 +213,7 @@ if Answer == 0 or Answer == 2:
         
         # Train model. If you have forgotten: X = input, Y = targeted outputs
         model.fit(X, Y, batch_size=batch, nb_epoch=1, callbacks=[checkpoint])
-        model.save('GRUModel.h5') # Saving current model state so that even after terminating the program; training
+        model.save_weights('GRUWeights.h5') # Saving current model state so that even after terminating the program; training
                                   # can be resumed for last state in the next run.
         print()
         
@@ -208,7 +224,7 @@ if Answer == 0 or Answer == 2:
         sample(seed)
 else:
     # load the network weights
-    filename = "GRUWeights.h5"
+    filename = "BestGRUWeights.h5"
     try:
         model.load_weights(filename)
     except:
