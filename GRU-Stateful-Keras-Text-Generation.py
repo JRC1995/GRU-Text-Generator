@@ -43,6 +43,7 @@ if mapvar == "y" or mapvar == "Y":
 
 # Asking the important questions
 sample_len = int(raw_input("\nLength of sample text: "))
+temperature = float(raw_input("Temperature: "))
 print("\nChoose:")
 print("Enter 0 to create a model and train it from the beginning.")
 print("Enter 1 to generate texts from saved model and weights.")
@@ -121,7 +122,7 @@ if Answer == 0:
         model.add(GRU(neurons[0], batch_input_shape=(batch, seq_len, vocabulary), stateful=True, return_sequences=True))
     model.add(Dropout(dropout_rate))
     for i in xrange(1,hidden_layers):
-          if i == (hidden_layers-1):
+        if i == (hidden_layers-1):
             model.add(GRU(neurons[i], stateful=True))
         else:
             model.add(GRU(neurons[i], stateful=True, return_sequences=True))
@@ -170,7 +171,14 @@ def sample(seed):
             prediction = model.predict(x,batch_size=batch,verbose=0)
             prediction = prediction[0]
             
-            # The prediction is an array of probabilities for each unique characters. 
+            # The prediction is an array of probabilities for each unique characters.
+            
+            prediction = np.asarray(prediction).astype('float64')
+            prediction = np.log(prediction) / temperature   #Scaling prediction values with 'temperature'
+                                                            #to manipulate diversities.
+            exp_preds = np.exp(prediction)
+            prediction = exp_preds / np.sum(exp_preds)
+            
             # Randomly an integer(mapped to a character) is chosen based on its likelihood 
             # as described in prediction list
             
@@ -205,7 +213,7 @@ if Answer == 0 or Answer == 2:
         print()
         
         # Train model. If you have forgotten: X = input, Y = targeted outputs
-        model.fit(X, Y, batch_size=batch, nb_epoch=1, callbacks=[checkpoint])
+        model.fit(X, Y, batch_size=batch, nb_epoch=1, shuffle=False, callbacks=[checkpoint])
         model.save_weights('GRUWeights.h5') # Saving current model state so that even after terminating the program; training
                                   # can be resumed for last state in the next run.
         print()
