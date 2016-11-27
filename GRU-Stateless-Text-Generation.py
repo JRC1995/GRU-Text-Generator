@@ -82,16 +82,6 @@ if Answer != 0:
         f.close()    
 
 if Answer == 0 or Answer == 2:
-    
-    # Doing some maths so that the total patterns in future become DIVISIBLE by batch size
-    # total no. of patterns need to divisible by batch size because each batch must be of the same size..
-    # ...so that the RNN layer can be 'Stateful'
-    
-    """index = int((total_chars-seq_len)/batch)
-    index = batch*index
-    dataset = dataset[:index+seq_len]
-    total_chars=len(dataset)"""
-    
     # prepare input data and output(target) data
     # (X signified Inputs and Y signifies Output(targeted-output in this case)
     dataX = []   
