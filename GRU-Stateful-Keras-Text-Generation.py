@@ -51,8 +51,10 @@ print("Enter 2 to resume training using last saved model and weights.")
 Answer = int(raw_input('Enter: '))
 
 if Answer == 0:
-    hidden_layers = int(raw_input("\nNumber of Hidden Layers: "))
+    hidden_layers = int(raw_input("\nNumber of Hidden Layers (Minimum 1): "))
     neurons = []
+    if hidden_layers == 0:
+        hidden_layers = 1;
     for i in xrange(0,hidden_layers):
         neurons.append(int(raw_input("Number of Neurons in Hidden Layer "+str(i+1)+": ")))
     seq_len = int(raw_input("Time Steps: "))
