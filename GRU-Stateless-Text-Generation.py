@@ -7,7 +7,7 @@
 from __future__ import print_function
 from keras.models import Sequential
 from keras.layers import Dense, Activation, Dropout
-from keras.layers import GRU
+from keras.layers import LSTM
 from keras.optimizers import RMSprop
 from keras.callbacks import ModelCheckpoint
 from keras.models import load_model
@@ -51,8 +51,10 @@ print("Enter 2 to resume training using last saved model and weights.")
 Answer = int(raw_input('Enter: '))
 
 if Answer == 0:
-    hidden_layers = int(raw_input("\nNumber of Hidden Layers: "))
+    hidden_layers = int(raw_input("\nNumber of Hidden Layers (Minimum 1): "))
     neurons = []
+    if hidden_layers == 0:
+        hidden_layers = 1;
     for i in xrange(0,hidden_layers):
         neurons.append(int(raw_input("Number of Neurons in Hidden Layer "+str(i+1)+": ")))
     seq_len = int(raw_input("Time Steps: "))
@@ -82,6 +84,16 @@ if Answer != 0:
         f.close()    
 
 if Answer == 0 or Answer == 2:
+    
+    # Doing some maths so that the total patterns in future become DIVISIBLE by batch size
+    # total no. of patterns need to divisible by batch size because each batch must be of the same size..
+    # ...so that the RNN layer can be 'Stateful'
+    
+    """index = int((total_chars-seq_len)/batch)
+    index = batch*index
+    dataset = dataset[:index+seq_len]
+    total_chars=len(dataset)"""
+    
     # prepare input data and output(target) data
     # (X signified Inputs and Y signifies Output(targeted-output in this case)
     dataX = []   
@@ -111,15 +123,15 @@ if Answer == 0:
 
     model = Sequential()
     if hidden_layers == 1:
-        model.add(GRU(neurons[0],input_shape=(seq_len, vocabulary)))
+        model.add(LSTM(neurons[0],input_shape=(seq_len, vocabulary)))
     else:
-        model.add(GRU(neurons[0],input_shape=(seq_len, vocabulary), return_sequences=True))
+        model.add(LSTM(neurons[0],input_shape=(seq_len, vocabulary), return_sequences=True))
     model.add(Dropout(dropout_rate))
     for i in xrange(1,hidden_layers):
         if i == (hidden_layers-1):
-            model.add(GRU(neurons[i]))
+            model.add(LSTM(neurons[i]))
         else:
-            model.add(GRU(neurons[i],return_sequences=True))
+            model.add(LSTM(neurons[i],return_sequences=True))
         model.add(Dropout(dropout_rate))
     
     model.add(Dense(vocabulary))
