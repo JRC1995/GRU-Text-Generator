@@ -7,7 +7,7 @@
 from __future__ import print_function
 from keras.models import Sequential
 from keras.layers import Dense, Activation, Dropout
-from keras.layers import LSTM
+from keras.layers import GRU
 from keras.optimizers import RMSprop
 from keras.callbacks import ModelCheckpoint
 from keras.models import load_model
@@ -123,15 +123,15 @@ if Answer == 0:
 
     model = Sequential()
     if hidden_layers == 1:
-        model.add(LSTM(neurons[0],input_shape=(seq_len, vocabulary)))
+        model.add(GRU(neurons[0],input_shape=(seq_len, vocabulary)))
     else:
-        model.add(LSTM(neurons[0],input_shape=(seq_len, vocabulary), return_sequences=True))
+        model.add(GRU(neurons[0],input_shape=(seq_len, vocabulary), return_sequences=True))
     model.add(Dropout(dropout_rate))
     for i in xrange(1,hidden_layers):
         if i == (hidden_layers-1):
-            model.add(LSTM(neurons[i]))
+            model.add(GRU(neurons[i]))
         else:
-            model.add(LSTM(neurons[i],return_sequences=True))
+            model.add(GRU(neurons[i],return_sequences=True))
         model.add(Dropout(dropout_rate))
     
     model.add(Dense(vocabulary))
