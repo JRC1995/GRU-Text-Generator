@@ -1,7 +1,4 @@
 # Multilayered (or singlelayered) GRU based RNN for text generation using Keras libraries
-# Tested in Tensorflow backend library
-# Code by: Jishnu Ray Chowdhury
-# License: BSD
 
 # import libraries
 from __future__ import print_function
