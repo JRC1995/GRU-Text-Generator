@@ -1,4 +1,4 @@
-# char-GRU
+# Auto-Text-Generation-Keras-GRU
 
 This is a simple implementation of an auto text generator in [Keras](https://keras.io/) with Tensorflow backend.
 
