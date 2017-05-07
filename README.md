@@ -24,7 +24,7 @@ I trained the model on a section of David Hume's "Treatise on Human Nature" down
 
 I could barely train the model and didn't much optimize the hyperparameters either. With my slow computer, I could just manage to run only a couple of epochs. 
 
-This is a sample output (on the stateless version IIRC):
+This is a sample output (on the stateless version, if I recall correctly):
 
 >to assuration of the object of the essence of the senses, there is any view of them in a naturally the under the founded of the probability, and it is the necessary entersiety of the sensation of the object of the relations, in a matter indisent, who we may only be into can never may be proportion of the really in the existent, is all it. i have us, that is thus, who pects or imagination and can in the pection, which will never particular is the a be and expectly imagin our evil of the to sensible to immedial effect of the one imagination of so angerious, that the most impsention to the imaginately in the man be ever would we passion, that of a same receive to the pection"
 
