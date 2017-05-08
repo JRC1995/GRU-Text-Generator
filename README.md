@@ -5,7 +5,7 @@ This is a simple implementation of an auto text generator in [Keras](https://ker
 I did this mainly as practice while trying to get my hands dirty with machine learning. (Also this was my first work related to machine
 learning other than a implementation of basic multilayered neural network in C)
 
-This work is based on the character level model as described on [Andrej Kaparthy's blog](http://karpathy.github.io/2015/05/21/rnn-effectiveness/).
+This work is based on the character level model as described on [Andrej Karpathy's blog](http://karpathy.github.io/2015/05/21/rnn-effectiveness/).
 
 There are other implementations of auto-text-generators in Keras. This one only have some minor differences.
 I used multilayered (no. of layers specified during runtime) GRU (Gated Recurrent Unit) for this model along with save, load and checkpoint mechanisms; also with some runtime options for loading a model or starting training from scratch and so on. 
