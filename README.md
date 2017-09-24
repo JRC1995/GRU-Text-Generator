@@ -7,12 +7,12 @@ learning other than a implementation of basic multilayered neural network in C)
 
 This work is based on the character level model as described on [Andrej Karpathy's blog](http://karpathy.github.io/2015/05/21/rnn-effectiveness/).
 
-There are other implementations of auto-text-generators in Keras. This one only have some minor differences.
+There are other implementations of auto-text-generators in Keras available in net. This one only have some minor differences.
 I used multilayered (no. of layers specified during runtime) GRU (Gated Recurrent Unit) for this model along with save, load and checkpoint mechanisms; also with some runtime options for loading a model or starting training from scratch and so on. 
 
 More about GRU, [here](https://arxiv.org/abs/1412.3555).
 
-As it can be noted I made two separate implementations: stateful and stateless.
+I made two separate implementations: stateful and stateless.
 
 This is what basically happens when stateful is enabled:
 
@@ -22,7 +22,8 @@ This is what basically happens when stateful is enabled:
 
 I trained the model on a section of David Hume's "Treatise on Human Nature" downloaded from Project Gutenberg.
 
-I could barely train the model and didn't much optimize the hyperparameters either. With my slow computer, I could just manage to run only a couple of epochs. 
+It was hard to play around with models like this in my slow computer. I didn't train the model for much epochs; also
+I didn't optimize the hyperparameters too.
 
 This is a sample output (on the stateless version, if I recall correctly):
 
